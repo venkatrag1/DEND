@@ -67,17 +67,26 @@ time_table_create = ("""
 # INSERT RECORDS
 
 songplay_table_insert = ("""
+    INSERT INTO songplays ( start_time, user_id, level, song_id, artist_id, 
+    session_id, location, user_agent)
+    VALUES ()
+    ON CONFLICT DO NOTHING;
 """)
 
 user_table_insert = ("""
 """)
 
 song_table_insert = ("""
+    INSERT INTO songs ( song_id, title, artist_id, year, duration )
+    VALUES (%s, %s, %s, %s, %s)
+    ON CONFLICT DO NOTHING;
 """)
 
 artist_table_insert = ("""
+    INSERT INTO artists ( artist_id, name, location, lattitude, longitude)
+    VALUES (%s, %s, %s, %s, %s)
+    ON CONFLICT DO NOTHING;
 """)
-
 
 time_table_insert = ("""
 """)
