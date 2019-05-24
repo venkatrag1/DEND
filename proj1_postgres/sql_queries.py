@@ -104,7 +104,7 @@ song_select = ("""
     SELECT songs.song_id, songs.artist_id
     FROM (songs LEFT JOIN artists ON songs.artist_id = artists.artist_id)
     WHERE songs.title = %s AND 
-          artists.artist_id = %s AND 
+          artists.artist_name = %s AND 
           songs.duration = %s;
 """)
 
