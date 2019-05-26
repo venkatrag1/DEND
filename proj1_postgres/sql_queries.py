@@ -76,7 +76,7 @@ songplay_table_insert = ("""
 user_table_insert = ("""
     INSERT INTO users ( user_id, first_name, last_name, gender, level)
     VALUES (%s, %s, %s, %s, %s)
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (user_id) DO UPDATE SET level=EXCLUDED.level;
 """)
 
 
@@ -102,9 +102,9 @@ time_table_insert = ("""
 
 song_select = ("""
     SELECT songs.song_id, songs.artist_id
-    FROM (songs LEFT JOIN artists ON songs.artist_id = artists.artist_id)
+    FROM (songs JOIN artists ON songs.artist_id = artists.artist_id)
     WHERE songs.title = %s AND 
-          artists.artist_name = %s AND 
+          artists.name = %s AND 
           songs.duration = %s;
 """)
 
