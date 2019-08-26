@@ -102,13 +102,13 @@ artist_table_create = ("""
 
 time_table_create = ("""
     CREATE TABLE IF NOT EXISTS time (
-    start_time BIGINT PRIMARY KEY,
+    start_time TIMESTAMP NOT NULL PRIMARY KEY,
     hour SMALLINT, 
     day SMALLINT,
     week SMALLINT,
     month SMALLINT,
     year SMALLINT,
-    weekday VARCHAR(16)
+    weekday SMALLINT
     );
 """)
 
@@ -152,14 +152,13 @@ artist_table_insert = ("""
 
 time_table_insert = ("""
     INSERT INTO time (start_time, hour, day, week, month, year, weekday)
-    SELECT DISTINCT(TO_CHAR(payment_date :: DATE, 'yyyyMMDD')::integer) AS date_key,
-           date(payment_date)                                           AS date,
-           EXTRACT(year FROM payment_date)                              AS year,
-           EXTRACT(quarter FROM payment_date)                           AS quarter,
-           EXTRACT(month FROM payment_date)                             AS month,
-           EXTRACT(day FROM payment_date)                               AS day,
-           EXTRACT(week FROM payment_date)                              AS week,
-           CASE WHEN EXTRACT(ISODOW FROM payment_date) IN (6, 7) THEN true ELSE false END AS is_weekend
+    SELECT DISTINCT TIMESTAMP 'epoch' + se.ts /1000 * INTERVAL AS start_time,
+           EXTRACT(hour from start_time) AS hour,
+           EXTRACT(day FROM start_time) AS day,
+           EXTRACT(week FROM start_time) AS week,
+           EXTRACT(month FROM start_time) AS month,
+           EXTRACT(year FROM start_time) AS year,
+           EXTRACT(dow FROM start_time) AS weekday
     FROM staging_events AS se
     WHERE se.page = 'NextSong';
 """)
