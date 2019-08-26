@@ -1,3 +1,7 @@
+__MACOSX
 *.csv
 *.tar.gz
 .DS_Store
+.idea
+.ipynb_checkpoints
+*.cfg
