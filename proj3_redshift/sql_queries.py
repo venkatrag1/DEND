@@ -19,8 +19,8 @@ time_table_drop = "DROP TABLE IF EXISTS time;"
 
 staging_events_table_create= ("""
     CREATE TABLE IF NOT EXISTS staging_events (
-    event_id IDENTITY(0,1) PRIMARY KEY,
-    artist VARCHAR(256),
+    event_id BIGINT IDENTITY(0,1) PRIMARY KEY,
+    artist VARCHAR(256) DISTKEY,
     auth VARCHAR(64),
     firstName VARCHAR(64),
     gender VARCHAR(2),
@@ -33,11 +33,11 @@ staging_events_table_create= ("""
     page VARCHAR(32),
     registration REAL,
     sessionId INTEGER NOT NULL,
-    song VARCHAR(256),
+    song VARCHAR(256) SORTKEY,
     status INTEGER,
     ts BIGINT NOT NULL,
     userAgent VARCHAR(512),
-    userId INTEGER NOT NULL  
+    userId INTEGER  
     );
 """)
 
@@ -48,9 +48,9 @@ staging_songs_table_create = ("""
     artist_latitude FLOAT,
     artist_longitude FLOAT,
     artist_location VARCHAR(512),
-    artist_name VARCHAR(512),
+    artist_name VARCHAR(512) DISTKEY,
     song_id VARCHAR(64) NOT NULL PRIMARY KEY,
-    title VARCHAR(512),
+    title VARCHAR(512) SORTKEY,
     duration DECIMAL(10),
     year SMALLINT
     )
@@ -58,8 +58,8 @@ staging_songs_table_create = ("""
 
 songplay_table_create = ("""
     CREATE TABLE IF NOT EXISTS songplays (
-    songplay_id IDENTITY(0,1) PRIMARY KEY, 
-    start_time BIGINT, 
+    songplay_id BIGINT IDENTITY(0,1) PRIMARY KEY, 
+    start_time TIMESTAMP NOT NULL, 
     user_id INT NOT NULL, 
     level VARCHAR(64), 
     song_id VARCHAR(64) NOT NULL, 
@@ -140,7 +140,7 @@ staging_songs_copy = ("""
 songplay_table_insert = ("""
     INSERT INTO songplays (start_time, user_id, level, song_id, artist_id, session_id, location, user_agent)
     SELECT DISTINCT 
-    TIMESTAMP 'epoch' + s_evts.ts /1000 * INTERVAL AS start_time,
+    TIMESTAMP 'epoch' + s_evts.ts /1000 * INTERVAL '1 second' AS start_time,
     s_evts.userId AS user_id,
     s_evts.level AS level,
     s_songs.song_id AS song_id,
@@ -193,7 +193,7 @@ artist_table_insert = ("""
 time_table_insert = ("""
     INSERT INTO time (start_time, hour, day, week, month, year, weekday)
     SELECT DISTINCT 
-    TIMESTAMP 'epoch' + s_evts.ts /1000 * INTERVAL AS start_time,
+    TIMESTAMP 'epoch' + s_evts.ts /1000 * INTERVAL '1 second' AS start_time,
     EXTRACT(hour from start_time) AS hour,
     EXTRACT(day FROM start_time) AS day,
     EXTRACT(week FROM start_time) AS week,
