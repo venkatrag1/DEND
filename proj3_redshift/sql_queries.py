@@ -59,10 +59,10 @@ staging_songs_table_create = ("""
 songplay_table_create = ("""
     CREATE TABLE IF NOT EXISTS songplays (
     songplay_id BIGINT IDENTITY(0,1) PRIMARY KEY, 
-    start_time TIMESTAMP NOT NULL, 
+    start_time TIMESTAMP NOT NULL SORTKEY, 
     user_id INT NOT NULL, 
     level VARCHAR(64), 
-    song_id VARCHAR(64) NOT NULL, 
+    song_id VARCHAR(64) NOT NULL DISTKEY, 
     artist_id VARCHAR(64) NOT NULL, 
     session_id INT NOT NULL, 
     location VARCHAR(256), 
@@ -77,12 +77,13 @@ user_table_create = ("""
     last_name VARCHAR(64),
     gender VARCHAR(2),
     level VARCHAR(64)
-    );  
+    )
+    DISTSTYLE ALL;  
 """)
 
 song_table_create = ("""
     CREATE TABLE IF NOT EXISTS songs (
-    song_id VARCHAR(64) PRIMARY KEY,
+    song_id VARCHAR(64) PRIMARY KEY DISTKEY,
     title VARCHAR(512),
     artist_id VARCHAR(64) NOT NULL,
     year SMALLINT, 
@@ -93,16 +94,17 @@ song_table_create = ("""
 artist_table_create = ("""
     CREATE TABLE IF NOT EXISTS artists (
     artist_id VARCHAR(64) PRIMARY KEY,
-    name  VARCHAR(512),
+    name  VARCHAR(512) SORTKEY,
     location VARCHAR(256),
     lattitude FLOAT,
     longitude FLOAT
-    );
+    )
+    DISTSTYLE ALL;
 """)
 
 time_table_create = ("""
     CREATE TABLE IF NOT EXISTS time (
-    start_time TIMESTAMP NOT NULL PRIMARY KEY,
+    start_time TIMESTAMP NOT NULL PRIMARY KEY SORTKEY,
     hour SMALLINT, 
     day SMALLINT,
     week SMALLINT,
@@ -183,10 +185,10 @@ artist_table_insert = ("""
     INSERT INTO artists (artist_id, name, location, lattitude, longitude)
     SELECT DISTINCT 
     s_songs.artist_id AS artist_id,
-    s_songs.name AS name,
-    s_songs.location AS location,
-    s_songs.lattitude AS latitude,
-    s_songs.longitude AS longitude
+    s_songs.artist_name AS name,
+    s_songs.artist_location AS location,
+    s_songs.artist_latitude AS latitude,
+    s_songs.artist_longitude AS longitude
     FROM staging_songs as s_songs;
 """)
 
