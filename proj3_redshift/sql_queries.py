@@ -138,29 +138,70 @@ staging_songs_copy = ("""
 # FINAL TABLES
 
 songplay_table_insert = ("""
-
+    INSERT INTO songplays (start_time, user_id, level, song_id, artist_id, session_id, location, user_agent)
+    SELECT DISTINCT 
+    TIMESTAMP 'epoch' + s_evts.ts /1000 * INTERVAL AS start_time,
+    s_evts.userId AS user_id,
+    s_evts.level AS level,
+    s_songs.song_id AS song_id,
+    s_songs.artist_id AS artist_id,
+    s_evts.sessionId AS session_id,
+    s_evts.location AS location,
+    s_evts.userAgent as user_agent
+    FROM staging_events AS s_evts
+    JOIN staging_songs AS s_songs
+    ON (s_evts.artist = s_songs.artist_name)
+    WHERE s_evts.page = 'NextSong'
+    AND s_evts.song = s_songs.title
+    AND s_evts.length = s_songs.duration;
 """)
 
 user_table_insert = ("""
+    INSERT INTO users (user_id, first_name, last_name, gender, level)
+    SELECT DISTINCT 
+    s_evts.userId AS user_id,
+    s_evts.firstName AS first_name,
+    s_evts.lastName AS last_name,
+    s_evts.gender AS gender,
+    s_evts.level AS level
+    FROM staging_events AS s_evts
+    WHERE s_evts.page = 'NextSong';
 """)
 
 song_table_insert = ("""
+    INSERT INTO songs (song_id, title, artist_id, year, duration)
+    SELECT DISTINCT 
+    s_songs.song_id AS song_id,
+    s_songs.title AS title,
+    s_songs.artist_id AS artist_id,
+    s_songs.year AS year,
+    s_songs.duration AS duration
+    FROM staging_songs AS s_songs;
 """)
 
 artist_table_insert = ("""
+    INSERT INTO artists (artist_id, name, location, lattitude, longitude)
+    SELECT DISTINCT 
+    s_songs.artist_id AS artist_id,
+    s_songs.name AS name,
+    s_songs.location AS location,
+    s_songs.lattitude AS latitude,
+    s_songs.longitude AS longitude
+    FROM staging_songs as s_songs;
 """)
 
 time_table_insert = ("""
     INSERT INTO time (start_time, hour, day, week, month, year, weekday)
-    SELECT DISTINCT TIMESTAMP 'epoch' + se.ts /1000 * INTERVAL AS start_time,
-           EXTRACT(hour from start_time) AS hour,
-           EXTRACT(day FROM start_time) AS day,
-           EXTRACT(week FROM start_time) AS week,
-           EXTRACT(month FROM start_time) AS month,
-           EXTRACT(year FROM start_time) AS year,
-           EXTRACT(dow FROM start_time) AS weekday
-    FROM staging_events AS se
-    WHERE se.page = 'NextSong';
+    SELECT DISTINCT 
+    TIMESTAMP 'epoch' + s_evts.ts /1000 * INTERVAL AS start_time,
+    EXTRACT(hour from start_time) AS hour,
+    EXTRACT(day FROM start_time) AS day,
+    EXTRACT(week FROM start_time) AS week,
+    EXTRACT(month FROM start_time) AS month,
+    EXTRACT(year FROM start_time) AS year,
+    EXTRACT(dow FROM start_time) AS weekday
+    FROM staging_events AS s_evts
+    WHERE s_evts.page = 'NextSong';
 """)
 
 # QUERY LISTS
