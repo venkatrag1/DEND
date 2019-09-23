@@ -1,4 +1,5 @@
 __MACOSX
+__pycache__
 *.csv
 *.tar.gz
 .DS_Store
