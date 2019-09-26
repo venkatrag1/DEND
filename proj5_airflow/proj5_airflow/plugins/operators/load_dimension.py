@@ -11,12 +11,33 @@ class LoadDimensionOperator(BaseOperator):
                  # Define your operators params (with defaults) here
                  # Example:
                  # conn_id = your-connection-name
+                 redshift_conn_id="",
+                 table="",
+                 create_sql="",
+                 insert_sql="",
+                 append_only=False,
                  *args, **kwargs):
-
         super(LoadDimensionOperator, self).__init__(*args, **kwargs)
         # Map params here
         # Example:
         # self.conn_id = conn_id
+        self.redshift_conn_id = redshift_conn_id
+        self.table = table
+        self.create_sql = create_sql
+        self.insert_sql = insert_sql
+        self.append_only = append_only
 
     def execute(self, context):
-        self.log.info('LoadDimensionOperator not implemented yet')
+        redshift = PostgresHook(postgres_conn_id=self.redshift_conn_id)
+        # For delete-load only mode, delete table otherwise skip
+        if not self.append_only:
+            self.log.info("Clearing data from fact table")
+            redshift.run("DROP TABLE IF EXISTS {}".format(self.table))
+
+        # Create table if doesn't exist
+        self.log.info("Creating fact table if not exists")
+        redshift.run(self.create_sql)
+
+        # Insert from staging to fact
+        self.log.info("Copying data from staging to fact")
+        redshift.run("INSERT INTO {} {}".format(self.table, self.insert_sql))
