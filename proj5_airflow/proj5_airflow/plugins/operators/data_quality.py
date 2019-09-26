@@ -43,10 +43,18 @@ class DataQualityOperator(BaseOperator):
                         break
                     else:
                         # no match
+                        if (retry_count + 1) == self.retry_count:
+                            raise ValueError("Data quality check failed!")
                         self.log.info("Test Failed! Retry no. {}".format(retry_count + 1))
                 except Exception as e:
                     # log exception and retry
-                        self.log.info("Get records threw an exception {}".format(str(e)))
+                    if (retry_count + 1) == self.retry_count:
+                        raise ValueError("Data quality check failed!")
+                    self.log.info("Get records threw an exception {}".format(str(e)))
+
+        self.log.info("Quality check completed successfully!")
+
+
 
 
 

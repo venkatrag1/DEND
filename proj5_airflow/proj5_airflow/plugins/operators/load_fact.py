@@ -39,3 +39,4 @@ class LoadFactOperator(BaseOperator):
         self.log.info("Copying data from staging to fact")
         redshift.run("INSERT INTO {} {}".format(self.table, self.insert_sql))
 
+        self.log.info("Load fact completed successfully!")

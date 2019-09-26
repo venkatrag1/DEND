@@ -41,3 +41,5 @@ class LoadDimensionOperator(BaseOperator):
         # Insert from staging to fact
         self.log.info("Copying data from staging to fact")
         redshift.run("INSERT INTO {} {}".format(self.table, self.insert_sql))
+
+        self.log.info("Load dimension completed successfully!")

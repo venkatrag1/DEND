@@ -62,6 +62,7 @@ class StageToRedshiftOperator(BaseOperator):
             self.format_specific,
         )
         redshift.run(formatted_sql)
+        self.log.info("Staging into Redshift completed successfully!")
         
 
 
